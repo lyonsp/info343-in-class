@@ -1,1 +1,12 @@
 /* put any app-specific style rules here */
+.sex-m {
+    background-color: #89CFF0;
+}
+
+.sex-f {
+    background-color: pink;
+}
+
+th {
+    cursor: pointer;
+}
