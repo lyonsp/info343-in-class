@@ -9,3 +9,91 @@
 //and q=... (string to search for, which we will get from the user)
 var baseURL = "https://api.spotify.com/v1/search?type=track&q=";
 
+var queryResults = document.querySelector(".query-results");
+var searchForm = document.querySelector(".search-form");
+// only search for elements in the form not in the whole page
+var searchInput = searchForm.querySelector("input");
+var searchButton = searchForm.querySelector("button");
+var spinner = document.querySelector("header .mdl-spinner");
+var previewAudio = new Audio();
+
+function doAnimation(elem, aniName) {
+    // have to add animated style class and specific animation name
+    elem.classList.add("animated", aniName);
+    elem.classList.add(aniName);
+    elem.addEventListener("animationend", function () {
+        elem.classList.remove(aniName);
+    });
+}
+
+function renderTrack(track) {
+    var img = document.createElement("img");
+    img.src = track.album.images[0].url;
+    img.alt = track.name;
+    img.title = img.alt;
+    doAnimation(img, "zoomIn");
+
+    img.addEventListener("click", function() {
+        if (previewAudio.src !== track.preview_url) {
+            previewAudio.pause();
+            previewAudio = new Audio(track.preview_url);
+            previewAudio.play();
+        } else {
+            if (previewAudio.paused) {
+                previewAudio.play();
+            } else {
+                previewAudio.pause();
+            }
+        }
+
+        doAnimation(img, "pulse");
+
+    });
+
+    queryResults.appendChild(img);
+}
+
+function render(data) {
+    console.log(data);
+    queryResults.innerHTML = "";
+
+    if (data.error || 0 == data.tracks.items.length) {
+        renderError(data.error || new Error("No results found"));
+    } else {
+        data.tracks.items.forEach(renderTrack);
+    }
+}
+
+function renderError(err) {
+    console.error(err);
+    var message = document.createElement("p");
+    message.classList.add("error-message");
+    message.textContent = err.message;
+    queryResults.appendChild(message);
+}
+
+searchForm.addEventListener("submit", function(evt) {
+    // prevents browser from posting stuff to server, we want to stay on the same page
+    evt.preventDefault();
+
+    // console.log("got submit event")
+    // trim takes off leading/trailing spaces
+    var query = searchInput.value.trim();
+    // console.log(query);
+    if (query.length <= 0) {
+        return false;
+    }
+
+    // returns promise <- JS object, can then use function to call a function when
+    // the promise data comes back
+    fetch(baseURL + query) 
+        // .then called when operation is successful
+        .then(function(response) {
+            return response.json();
+        })
+        .then(render)
+        // .catch when error
+        .catch(renderError);
+
+    return false;
+});
