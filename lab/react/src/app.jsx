@@ -11,13 +11,22 @@ import SearchCity from './SearchCity.jsx';
 // Familiarize yourself with React's lifecycle methods : https://facebook.github.io/react/docs/react-component.html
 const url = 'http://api.openweathermap.org/data/2.5/weather?q=';
 // Put your key after the '='
-const key = '&APPID=';
+const key = '&APPID=b58001295088c9fb5326eb64b1423ce7';
+const weather_api = url + "Seattle" + key;
 
 export default class extends React.Component {
     constructor(props) {
         super(props);
+		this.state = {};
+		this.componentDidMount();
     }
 	
+	componentDidMount() {
+        fetch(weather_api)
+            .then(response => response.json())
+        	.then(data => this.setState({weather: data}));
+    }
+
 	// This function is for part 2. It looks at the state property for Fahrenheit (which you will have to define)
 	// and converts the initial temperature from Kelvin to either Fahrenheit or Celsius. 
 	// Returns the value with no decimal points.
@@ -30,12 +39,16 @@ export default class extends React.Component {
 	// 	}
 	// }
 
-    render() {    	
+    render() {    
+		var weather;
+		if(this.state.weather) {
+			weather = <WeatherCard data={this.state.weather} />;
+		}
+		//weather = this.state.weather.results.map(w => <WeatherCard key={w.id} weather={w} />);	
         return (
         	<div>
-	        	<p className="center-text">Replace this with your app</p>
+				{weather}
 	        	<SearchCity />
-	        	<WeatherCard />
 	        </div>
         );
     }
